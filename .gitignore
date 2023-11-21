@@ -1,1 +1,4 @@
-/.lake
+/build
+/lake-packages/*
+*.olean
+/.lake/

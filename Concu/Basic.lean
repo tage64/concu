@@ -1,3 +1,5 @@
+import Mathlib.Data.List.Sort
+import Mathlib.Order.Basic
 import Std.Logic
 
 structure DataStructure : Type _ where
@@ -41,3 +43,28 @@ def Traces : ρ.Trace → Prop :=
   ρ.validTrace ρ.init
 end
 end DataStructure
+
+namespace History
+inductive Entry
+| invoke
+| ret
+export Entry (invoke ret)
+end History
+
+structure History (ρ : DataStructure) where
+  ops : List ρ.Operation
+  order : LinearOrder (Fin ops.length × History.Entry)
+  invokeBeforeRet : ∀ i, order.le (i, invoke) (i, ret)
+attribute [instance] History.order
+
+namespace History
+section
+variable {ρ : DataStructure} (h : History ρ)
+
+def isSequential : Prop :=
+  ∀ i j : Fin h.ops.length, (j, invoke) ≤ (i, invoke) ∨ (i, ret) ≤ (j, invoke)
+
+def toTrace (seq : h.isSequential) : List Nat :=
+  (h.ops.mapIdx (fun i _ => (Fin.ofNat i, invoke))) |> List.mergeSort h.order.lt |> List.map Prod.fst
+end
+end History

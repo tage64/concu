@@ -1,3 +1,4 @@
 -- This module serves as the root of the `Concu` library.
--- Import modules here that should be built as part of the library.
-import «Concu».Basic
+import Concu.Basic
+import Concu.Data.Register
+import Concu.Data.Set

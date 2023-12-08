@@ -1,4 +1,3 @@
-import Mathlib.Data.Finset.Basic
 import Std.Logic
 
 structure DataStructure : Type _ where
@@ -42,73 +41,3 @@ def Traces : ρ.Trace → Prop :=
   ρ.validTrace ρ.init
 end
 end DataStructure
-
-namespace Register
-section
-variable (α : Type) [Inhabited α] [DecidableEq α]
-
-inductive Method : Type → Type
-| read : Method α
-| write : α → Method Unit
-
-def Register : DataStructure where
-  σ := α
-  init := default
-  Method := Method α
-  guard
-    | .read, ret, s => ret = s
-    | .write _, _, _ => True
-  decGuard
-    | .read, ret, s => if h : ret = s
-      then isTrue h
-      else isFalse h
-    | .write _, _, _ => isTrue trivial
-  rule
-    | .write x, _, _, _ => x
-    | .read, _, s, _ => s
-end
-end Register
-export Register (Register)
-
-namespace Set
-section
-variable (α : Type) [DecidableEq α]
-
-inductive Method : Type → Type where
-| contains : α → Method Bool
-| add : α → Method Bool
-| remove : α → Method Bool
-
-def Set : DataStructure where
-  σ := Finset α
-  init := ∅
-  Method := Method α
-  guard
-    | .contains x, true, s 
-    | .add x, false, s
-    | .remove x, true, s
-      => x ∈ s
-    | .contains x, false, s
-    | .add x, true, s
-    | .remove x, false, s
-      => x ∉ s
-  decGuard
-    | .contains _, true, _ 
-    | .add _, false, _
-    | .remove _, true, _
-    | .contains _, false, _
-    | .add _, true, _
-    | .remove _, false, _
-      => inferInstance
-  rule
-    | .add x, true, s, hIn => s.cons x hIn
-    | .remove x, true, s, _ => s.erase x
-    | .contains _, _, s, _
-    | .add _, false, s, _
-    | .remove _, false, s, _
-      => s
-end
-end Set
-export Set (Set)
-    
-
